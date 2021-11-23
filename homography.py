@@ -1,4 +1,5 @@
 import numpy as np
+import cv2
 
 def convertToHomogeneous(points):
     heterogeneous = np.array(points)
@@ -7,7 +8,9 @@ def convertToHomogeneous(points):
     return homogeneous
 
 def convertToHeterogeneous(points):
-    pass
+    for i in range(len(points)):
+        points[i]/=points[2]
+    return points[0:2]
 
 class Homography():
     def __init__(self,points):
@@ -35,18 +38,48 @@ class Homography():
             self.A= np.concatenate((self.A,ai),axis=0) if self.A.size else ai
     
     def solve(self):
+        #1. Create matrix A
         self.createA()
-        print(self.A)
 
+        #2. Compute SVD (Singular Value Decomposition)
+        U, D, Vt = np.linalg.svd(self.A, full_matrices=True)
 
-# TEST
-points = [
-    [
-        [1,1],[2,2],[3,3]
-    ],
-    [
-        [2,2],[4,4],[6,6]
-    ]
-]
-homography = Homography(points)
-homography.solve()
+        #3. Store singular vector of the smallest singular value
+        min_i = np.argmin(D) 
+        singular_vector = Vt[min_i] # column of V corresponding to the smallest singular value (row of Vt)
+        h = singular_vector
+
+        #4. Reshape to get H
+        self.H = h.reshape((3, 3))
+        return self.H
+        
+
+    def verifyH(self,imgs):
+        i=0
+        print("From Image 1 to Image 2: x'=Hx")
+        for x in self.points_1:
+            x_ = np.dot(self.H,x)
+            x_/=x_[2]
+            x_ = x_[0:2]
+            print(f'{x_} vs {self.points_2[i][0:2]}')
+            i+=1
+            # displaying a point 
+            x_ = np.around(x_).astype(int)
+            cv2.circle(imgs[1], (x_[0],x_[1]), radius=2, color=(0, 255, 0), thickness=1)
+        i=0
+        print("From Image 2 to Image 1: x=H-1x'")
+        invH = np.linalg.inv(self.H) 
+        for x in self.points_2:
+            x_ = np.dot(invH,x)
+            x_/=x_[2]
+            x_ = x_[0:2]
+            print(f'{x_} vs {self.points_1[i][0:2]}')
+            i+=1
+            # displaying a point
+            x_ = np.around(x_).astype(int) 
+            cv2.circle(imgs[0], (x_[0],x_[1]), radius=3, color=(0, 255, 0), thickness=1)
+        
+        cv2.imshow('From Image 1 to Image 2', imgs[1])  
+        cv2.imshow('From Image 2 to Image 1', imgs[0])  
+        cv2.waitKey(0)
+

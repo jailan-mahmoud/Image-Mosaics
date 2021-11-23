@@ -10,10 +10,6 @@ def click_event(event, x, y, flags, params):
         # checking for left mouse clicks
         if event == cv2.EVENT_LBUTTONDOWN:
 
-            # displaying the coordinates
-            # on the Shell
-            # print(x, ' ', y)
-
             # Save point (x,y)
             if '1' in params['img_name']:
                 points_1.append([x,y])
@@ -37,6 +33,9 @@ class Images:
         # read images
         for path in paths:
             self.imgs.append(cv2.imread(path))
+    
+    def getimgs(self):
+        return self.imgs
     
     def show(self):
         i=1
