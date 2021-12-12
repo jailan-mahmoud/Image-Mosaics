@@ -1,5 +1,7 @@
 
 import cv2
+import numpy as np
+import copy
 
 # correspondence points lists
 points_1 = []
@@ -23,16 +25,24 @@ def click_event(event, x, y, flags, params):
 # Plot the input images and get mouse click positions
 class Images:
 
-    def __init__(self,paths):
+    def __init__(self,paths,imgs=None):
         self.points_1 = []
         self.points_2 = []
         self.imgs= []
-        # check number of images
-        if(len(paths)<2):
-            raise Exception('2 images are required')
+
         # read images
-        for path in paths:
-            self.imgs.append(cv2.imread(path))
+        if(paths):
+            # check number of images
+            if(len(paths)<2):
+                raise Exception('2 images are required')
+            for path in paths:
+                self.imgs.append(cv2.imread(path))
+        elif(imgs):
+            # check number of images
+            if(len(imgs)<2):
+                raise Exception('2 images are required')
+            # save images
+            self.imgs=copy.deepcopy(imgs)
     
     def getimgs(self):
         return self.imgs

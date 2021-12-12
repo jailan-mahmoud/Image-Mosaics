@@ -9,13 +9,13 @@ def convertToHomogeneous(points):
 
 def convertToHeterogeneous(points):
     for i in range(len(points)):
-        points[i]/=points[2]
+        points[i]/=points[i][2]
     return points[0:2]
 
 class Homography():
-    def __init__(self,points):
-        self.points_1 = convertToHomogeneous(points[0])
-        self.points_2 = convertToHomogeneous(points[1])
+    def __init__(self,src_points,dst_points):
+        self.points_1 = convertToHomogeneous(src_points)
+        self.points_2 = convertToHomogeneous(dst_points)
         n = self.points_1[0]
         self.A = np.array([],dtype=float)
     
@@ -24,7 +24,7 @@ class Homography():
         x = point_1[0]
         y = point_1[1]
         x_= point_2[0]
-        y_=point_2[1]
+        y_= point_2[1]
 
         ai = np.array([
             [-x,-y,-1,0,0,0,x*x_,y*x_,x_],
@@ -65,7 +65,7 @@ class Homography():
             i+=1
             # displaying a point 
             x_ = np.around(x_).astype(int)
-            cv2.circle(imgs[1], (x_[0],x_[1]), radius=2, color=(0, 255, 0), thickness=1)
+            cv2.circle(imgs[1], (x_[0],x_[1]), radius=3, color=(0, 255, 0), thickness=1)
         i=0
         print("From Image 2 to Image 1: x=H-1x'")
         invH = np.linalg.inv(self.H) 
